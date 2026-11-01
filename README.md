@@ -1,5 +1,20 @@
 # MuObserve-ipc
 
+<p align="center">
+  <a href="https://hook.lma1980.duckdns.org/jobs">
+    <img src="https://hook.lma1980.duckdns.org/cards/LMA1980/MuObserve-ipc/card.svg" alt="MuObserve-ipc Factory Scorecard" width="520"/>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/MuObserve-ipc/status.svg" alt="CI Status"/></a>
+  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/MuObserve-ipc/score.svg" alt="Quality Score"/></a>
+  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/MuObserve-ipc/coverage.svg" alt="Coverage"/></a>
+  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/MuObserve-ipc/benchmark.svg" alt="Benchmark"/></a>
+</p>
+
+---
+
 Shared wire contracts, zero-copy Apache Arrow telemetry schemas, OpenTelemetry (OTEL) span/metric/log envelopes, and Apache Fory control-plane RPC protocols for the **MuObserve** distributed observability and regression analytics platform.
 
 ## Architectural Scope
