@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use crate::error::IpcError;
 use fory::{Fory, ForyEnum, ForyStruct};
 use serde::{Deserialize, Serialize};
@@ -430,15 +432,34 @@ pub fn create_fory_runtime() -> Result<Fory, IpcError> {
     create_fory_registry()
 }
 
-/// Encodes a [`ControlRpcEnvelope`] into Apache Fory binary bytes.
-pub fn encode_control_envelope(envelope: &ControlRpcEnvelope) -> Result<Vec<u8>, IpcError> {
-    let fory = create_fory_registry()?;
-    Ok(fory.serialize(envelope)?)
+/// Returns a process-wide shared [`Fory`] registry instance so repeated RPC serialization
+/// reuses the same Fory registry ID and avoids unbounded thread-local `ContextCache` growth.
+pub fn shared_fory_registry() -> Result<&'static Fory, IpcError> {
+    static SHARED_FORY: OnceLock<Fory> = OnceLock::new();
+    if let Some(fory) = SHARED_FORY.get() {
+        return Ok(fory);
+    }
+    let built = create_fory_registry()?;
+    let _ = SHARED_FORY.set(built);
+    SHARED_FORY.get().ok_or_else(|| {
+        IpcError::Fory(fory::Error::invalid_data(
+            "Failed to initialize shared Fory registry",
+        ))
+    })
 }
 
-/// Decodes a [`ControlRpcEnvelope`] from Apache Fory binary bytes.
+/// Encodes a [`ControlRpcEnvelope`] into Apache Fory binary bytes using the shared registry
+/// and a caller-owned buffer so no capacity is retained in thread-local `WriteContext` caches.
+pub fn encode_control_envelope(envelope: &ControlRpcEnvelope) -> Result<Vec<u8>, IpcError> {
+    let fory = shared_fory_registry()?;
+    let mut buf = Vec::new();
+    fory.serialize_to(&mut buf, envelope)?;
+    Ok(buf)
+}
+
+/// Decodes a [`ControlRpcEnvelope`] from Apache Fory binary bytes using the shared registry.
 pub fn decode_control_envelope(bytes: &[u8]) -> Result<ControlRpcEnvelope, IpcError> {
-    let fory = create_fory_registry()?;
+    let fory = shared_fory_registry()?;
     Ok(fory.deserialize::<ControlRpcEnvelope>(bytes)?)
 }
 
